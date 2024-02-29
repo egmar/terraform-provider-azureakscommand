@@ -193,10 +193,10 @@ func (p *AzureAksCommandProvider) Configure(ctx context.Context, req provider.Co
 		oidcRequestUrl := getStringAttributeFromEnvironment(data.OidcRequestUrl, []string{"ARM_OIDC_REQUEST_URL", "ACTIONS_ID_TOKEN_REQUEST_URL"}, "")
 		oidcRequestToken := getStringAttributeFromEnvironment(data.OidcRequestToken, []string{"ARM_OIDC_REQUEST_TOKEN", "ACTIONS_ID_TOKEN_REQUEST_TOKEN"}, "")
 
-		if token != "" && oidcRequestUrl != "" && oidcRequestToken != "" {
+		if token == "" && oidcRequestUrl != "" && oidcRequestToken != "" {
 			var err error
 
-			token, err = helpers.GetOidcTokenFromGithubActions(data.OidcRequestUrl.ValueString(), data.OidcRequestToken.ValueString())
+			token, err = helpers.GetOidcTokenFromGithubActions(oidcRequestUrl, oidcRequestToken)
 			if err != nil {
 				resp.Diagnostics.AddError("Error while request token from GH API", err.Error())
 				return

@@ -204,16 +204,22 @@ func (p *AzureAksCommandProvider) Configure(ctx context.Context, req provider.Co
 		}
 
 		if token != "" {
-			f, err := os.CreateTemp("", "token*")
-			if err != nil {
-				resp.Diagnostics.AddError("Error while setup OIDC token file", err.Error())
-				return
-			}
+			tf, tfOk := os.LookupEnv("RUNNER_TEMP")
 
-			_, err = f.WriteString(token)
-			if err != nil {
-				resp.Diagnostics.AddError("Error while setup OIDC token file", err.Error())
-				return
+			var f *os.File
+			var err error
+			if tfOk {
+				f, err = os.CreateTemp(tf, "token*")
+				if err != nil {
+					resp.Diagnostics.AddError("Error while setup OIDC token file", err.Error())
+					return
+				}
+			} else {
+				f, err = os.CreateTemp("", "token*")
+				if err != nil {
+					resp.Diagnostics.AddError("Error while setup OIDC token file", err.Error())
+					return
+				}
 			}
 
 			_ = os.Setenv("AZURE_FEDERATED_TOKEN_FILE", f.Name())
